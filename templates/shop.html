@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Shop - Super Ecom{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Shop</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <!-- Sidebar filters -->
+    <div class="md:col-span-1">
+        <h3 class="font-semibold mb-2">Filters</h3>
+        <form method="GET">
+            <!-- Search -->
+            <input type="text" name="q" placeholder="Search..." value="{{ query }}"
+                   class="w-full mb-2 p-2 border rounded">
+
+            <!-- Category -->
+            <select name="category" class="w-full mb-2 p-2 border rounded">
+                <option value="">All Categories</option>
+                {% for c in all_categories %}
+                    <option value="{{ c }}" {% if category==c %}selected{% endif %}>
+                        {{ c | capitalize }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <!-- Price Range -->
+            <div class="flex gap-2 mb-2">
+                <input type="number" name="min_price" placeholder="Min $" value="{{ request.args.get('min_price', '') }}"
+                       class="w-1/2 p-2 border rounded">
+                <input type="number" name="max_price" placeholder="Max $" value="{{ request.args.get('max_price', '') }}"
+                       class="w-1/2 p-2 border rounded">
+            </div>
+
+            <!-- Rating -->
+            <select name="min_rating" class="w-full mb-2 p-2 border rounded">
+                <option value="">Any Rating</option>
+                <option value="1" {% if request.args.get('min_rating')=='1' %}selected{% endif %}>1★ & up</option>
+                <option value="2" {% if request.args.get('min_rating')=='2' %}selected{% endif %}>2★ & up</option>
+                <option value="3" {% if request.args.get('min_rating')=='3' %}selected{% endif %}>3★ & up</option>
+                <option value="4" {% if request.args.get('min_rating')=='4' %}selected{% endif %}>4★ & up</option>
+            </select>
+
+            <!-- Submit -->
+            <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">Apply</button>
+        </form>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="md:col-span-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for p in products %}
+        <div class="bg-white p-2 rounded shadow hover:shadow-lg">
+            <a href="/product/{{ p.id }}">
+                <img src="{{ p.thumbnail }}" alt="{{ p.title }}" class="w-full h-32 object-cover rounded">
+                <h3 class="mt-2 font-semibold text-sm">{{ p.title }}</h3>
+                <p class="text-orange-500 font-bold">${{ p.price }}</p>
+                <p class="text-gray-500 text-xs">{{ p.category }}</p>
+                <p class="text-yellow-500 text-xs">⭐ {{ p.rating }}</p>
+            </a>
+        </div>
+        {% endfor %}
+
+        {% if products|length == 0 %}
+            <p class="col-span-full text-gray-500">No products found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

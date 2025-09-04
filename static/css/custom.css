@@ -1,0 +1,19 @@
+/* small custom tweaks */
+.product-card img {
+  transition: transform 0.25s ease;
+}
+.product-card:hover img {
+  transform: scale(1.03);
+}
+
+/* circle container sizing */
+#circleCarousel {
+  min-height: 18rem;
+}
+
+/* make sure main nav search is visible and accessible on small screens */
+@media (max-width: 640px) {
+  nav input[name="q"] {
+    height: 34px;
+  }
+}

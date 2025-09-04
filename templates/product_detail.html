@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% block title %}{{ product.title }} - Super Ecom{%
+endblock %} {% block content %}
+<div class="bg-white p-4 rounded shadow-md max-w-3xl mx-auto">
+  <img
+    src="{{ product.thumbnail }}"
+    alt="{{ product.title }}"
+    class="w-full h-64 object-cover rounded mb-4"
+  />
+  <h1 class="text-2xl font-bold">{{ product.title }}</h1>
+  <p class="text-gray-500 mt-1">{{ product.category }}</p>
+  <p class="text-orange-500 font-bold text-xl mt-2">${{ product.price }}</p>
+  <p class="mt-4">{{ product.description }}</p>
+  {% if product.brand %}
+  <p class="mt-2 text-sm text-gray-600">Brand: {{ product.brand }}</p>
+  {% endif %} {% if product.rating %}
+  <p class="mt-1 text-sm text-gray-600">Rating: {{ product.rating }}/5</p>
+  {% endif %}
+</div>
+{% endblock %}

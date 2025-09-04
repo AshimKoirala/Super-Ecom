@@ -1,0 +1,45 @@
+<div class="relative w-full max-w-6xl mx-auto mb-8">
+  <div id="heroCarousel" class="overflow-hidden rounded-xl">
+    <div class="carousel-track flex transition-transform duration-700">
+      <div class="min-w-full relative">
+        <img
+          src="{{ url_for('static', filename='images/sale.webp') }}"
+          class="w-full h-64 object-cover rounded-xl"
+          alt="hero"
+        />
+        <div class="absolute left-8 bottom-8 text-white">
+          <h2 class="text-3xl font-bold">Welcome to the Store</h2>
+          <p class="mt-2">Curated products for modern life</p>
+        </div>
+      </div>
+      <!-- Repeat if needed -->
+      <div class="min-w-full relative">
+        <img
+          src="{{ url_for('static', filename='images/sale.webp') }}"
+          class="w-full h-64 object-cover rounded-xl"
+          alt="hero"
+        />
+        <div class="absolute left-8 bottom-8 text-white">
+          <h2 class="text-3xl font-bold">New Arrivals</h2>
+          <p class="mt-2">Fresh picks just for you</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const track = document.querySelector("#heroCarousel .carousel-track");
+    if (!track) return;
+    let idx = 0;
+    const slides = track.children;
+    function show(i) {
+      track.style.transform = `translateX(-${i * 100}%)`;
+    }
+    setInterval(() => {
+      idx = (idx + 1) % slides.length;
+      show(idx);
+    }, 3500);
+  })();
+</script>

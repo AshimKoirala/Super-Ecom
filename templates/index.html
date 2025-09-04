@@ -1,0 +1,198 @@
+{% extends "base.html" %} {% block title %}Home - Super Ecom{% endblock %} {%
+block content %} {% include "components/hero_carousel.html" %}
+
+<h2 class="text-2xl font-bold mb-4">Trending Products</h2>
+<div class="relative overflow-hidden">
+  <!-- Slider container -->
+  <div
+    id="circleItems"
+    class="flex transition-transform duration-500 ease-linear gap-6"
+    data-items='[
+         {% for p in trending %}
+            {
+                "id": {{ p.id }},
+                "title": "{{ p.title|e }}",
+                "price": {{ p.price }},
+                "thumbnail": "{{ p.thumbnail|e }}",
+                "category": "{{ p.category|e }}"
+            }{% if not loop.last %},{% endif %}
+         {% endfor %}
+       ]'
+  ></div>
+
+  <!-- Left/Right arrows -->
+  <button
+    id="prevBtn"
+    class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded"
+  >
+    ‹
+  </button>
+  <button
+    id="nextBtn"
+    class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded"
+  >
+    ›
+  </button>
+</div>
+
+<h2 class="text-2xl font-bold mt-8 mb-4">Categories</h2>
+<div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+  {% for c in categories %}
+  <a
+    href="{{ url_for('shop', category=c) }}"
+    class="bg-white p-4 rounded shadow text-center hover:bg-gray-100 capitalize"
+  >
+    {{ c }}
+  </a>
+  {% endfor %}
+</div>
+<h2 class="text-2xl font-bold mt-8 mb-4">Featured Products</h2>
+<div
+  id="featuredItems"
+  class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+  data-items='[
+       {% for p in featured %}
+          {
+              "id": {{ p.id }},
+              "title": "{{ p.title|e }}",
+              "price": {{ p.price }},
+              "thumbnail": "{{ p.thumbnail|e }}",
+              "category": "{{ p.category|e }}"
+          }{% if not loop.last %},{% endif %}
+       {% endfor %}
+     ]'
+></div>
+
+<!-- Loader -->
+<div id="featuredLoader" class="text-center py-4 hidden">
+  <p class="text-gray-500">Loading more products...</p>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const featuredContainer = document.getElementById("featuredItems");
+    const featuredData = JSON.parse(
+      featuredContainer.getAttribute("data-items")
+    );
+    const featuredLoader = document.getElementById("featuredLoader");
+
+    let featuredIndex = 0;
+    const itemsPerLoad = 12;
+
+    function renderFeaturedBatch() {
+      const slice = featuredData.slice(
+        featuredIndex,
+        featuredIndex + itemsPerLoad
+      );
+      slice.forEach((p) => {
+        const div = document.createElement("div");
+        div.className = "bg-white p-2 rounded shadow hover:shadow-lg";
+        div.innerHTML = `
+          <a href="/product/${p.id}">
+            <img src="${p.thumbnail}" alt="${p.title}" class="w-full h-32 object-cover rounded">
+            <h3 class="mt-2 font-semibold text-sm">${p.title}</h3>
+            <p class="text-orange-500 font-bold">$${p.price}</p>
+            <p class="text-gray-500 text-xs">${p.category}</p>
+          </a>
+        `;
+        featuredContainer.appendChild(div);
+      });
+      featuredIndex += itemsPerLoad;
+      featuredLoader.classList.add("hidden");
+    }
+
+    function handleFeaturedScroll() {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 200
+      ) {
+        if (featuredIndex < featuredData.length) {
+          featuredLoader.classList.remove("hidden");
+          setTimeout(renderFeaturedBatch, 500);
+        } else {
+          featuredLoader.innerHTML = `<p class="text-gray-400">No more products</p>`;
+          featuredLoader.classList.remove("hidden");
+          window.removeEventListener("scroll", handleFeaturedScroll);
+        }
+      }
+    }
+
+    // Initial load
+    renderFeaturedBatch();
+
+    // Scroll listener
+    window.addEventListener("scroll", handleFeaturedScroll);
+
+    // --- Trending Carousel ---
+    const carouselContainer = document.getElementById("circleItems");
+    const items = JSON.parse(carouselContainer.getAttribute("data-items"));
+    const visibleCount = 6;
+
+    // Duplicate items for smooth loop
+    const loopItems = items.concat(items);
+
+    loopItems.forEach((p) => {
+      const div = document.createElement("div");
+      div.className =
+        "bg-white p-2 rounded shadow hover:shadow-lg flex-shrink-0";
+      div.style.width = `${100 / visibleCount}%`;
+      div.innerHTML = `
+        <a href="/product/${p.id}">
+          <img src="${p.thumbnail}" alt="${p.title}" class="w-full h-32 object-cover rounded">
+          <h3 class="mt-2 font-semibold text-sm">${p.title}</h3>
+          <p class="text-orange-500 font-bold">$${p.price}</p>
+          <p class="text-gray-500 text-xs">${p.category}</p>
+        </a>
+      `;
+      carouselContainer.appendChild(div);
+    });
+
+    let position = 0;
+
+    function updateCarousel() {
+      carouselContainer.style.transform = `translateX(-${
+        (100 / visibleCount) * position
+      }%)`;
+    }
+
+    function moveNext() {
+      position++;
+      if (position >= items.length) {
+        position = 0;
+        carouselContainer.style.transition = "none";
+        updateCarousel();
+        setTimeout(() => {
+          carouselContainer.style.transition = "transform 0.5s linear";
+        }, 50);
+      } else {
+        updateCarousel();
+      }
+    }
+
+    function movePrev() {
+      position--;
+      if (position < 0) {
+        position = items.length - 1;
+      }
+      updateCarousel();
+    }
+
+    // Auto slide every 5s
+    let autoSlide = setInterval(moveNext, 5000);
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      moveNext();
+      clearInterval(autoSlide);
+      autoSlide = setInterval(moveNext, 5000);
+    });
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      movePrev();
+      clearInterval(autoSlide);
+      autoSlide = setInterval(moveNext, 5000);
+    });
+
+    updateCarousel();
+  });
+</script>
+
+{% endblock %}
